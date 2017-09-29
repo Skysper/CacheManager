@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="wwwroot\lib\bootstrap\fonts\**" />
+    <Compile Remove="wwwroot\lib\bootstrap\grunt\**" />
+    <Compile Remove="wwwroot\lib\bootstrap\js\**" />
+    <Compile Remove="wwwroot\lib\bootstrap\less\**" />
+    <Compile Remove="wwwroot\lib\bootstrap\nuget\**" />
+    <Compile Remove="wwwroot\lib\vue\packages\**" />
+    <Content Remove="wwwroot\lib\bootstrap\fonts\**" />
+    <Content Remove="wwwroot\lib\bootstrap\grunt\**" />
+    <Content Remove="wwwroot\lib\bootstrap\js\**" />
+    <Content Remove="wwwroot\lib\bootstrap\less\**" />
+    <Content Remove="wwwroot\lib\bootstrap\nuget\**" />
+    <Content Remove="wwwroot\lib\vue\packages\**" />
+    <EmbeddedResource Remove="wwwroot\lib\bootstrap\fonts\**" />
+    <EmbeddedResource Remove="wwwroot\lib\bootstrap\grunt\**" />
+    <EmbeddedResource Remove="wwwroot\lib\bootstrap\js\**" />
+    <EmbeddedResource Remove="wwwroot\lib\bootstrap\less\**" />
+    <EmbeddedResource Remove="wwwroot\lib\bootstrap\nuget\**" />
+    <EmbeddedResource Remove="wwwroot\lib\vue\packages\**" />
+    <None Remove="wwwroot\lib\bootstrap\fonts\**" />
+    <None Remove="wwwroot\lib\bootstrap\grunt\**" />
+    <None Remove="wwwroot\lib\bootstrap\js\**" />
+    <None Remove="wwwroot\lib\bootstrap\less\**" />
+    <None Remove="wwwroot\lib\bootstrap\nuget\**" />
+    <None Remove="wwwroot\lib\vue\packages\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="wwwroot\lib\vue\vue.common.js" />
+    <Content Include="wwwroot\lib\vue\vue.esm.js" />
+    <Content Include="wwwroot\lib\vue\vue.js" />
+    <Content Include="wwwroot\lib\vue\vue.min.js" />
+    <Content Include="wwwroot\lib\vue\vue.runtime.common.js" />
+    <Content Include="wwwroot\lib\vue\vue.runtime.esm.js" />
+    <Content Include="wwwroot\lib\vue\vue.runtime.js" />
+    <Content Include="wwwroot\lib\vue\vue.runtime.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="1.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="SapientGuardian.MySql.Data" Version="6.9.816" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CacheManager.Caching\CacheManager.Caching.csproj" />
+    <ProjectReference Include="..\CacheManager.Model\CacheManager.Model.csproj" />
+    <ProjectReference Include="..\CacheManager.Repository\CacheManager.Repository.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\bootstrap\" />
+  </ItemGroup>
+</Project>
