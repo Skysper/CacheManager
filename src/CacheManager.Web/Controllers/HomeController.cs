@@ -102,8 +102,13 @@ namespace CacheManager.Web.Controllers
                     list.Add(cr);
                 }
             }
-            //
 
+            //if the cache connection string is error
+            //the cache result list will return null
+            //then reset the key count to 0
+            if (list == null || list.Count == 0) {
+                keyCount = 0;
+            }
             return Json(new { Count = keyCount, Data = list });
         }
 
