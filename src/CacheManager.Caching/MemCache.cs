@@ -26,5 +26,21 @@ namespace CacheManager.Caching
         {
             return null;
         }
+
+        /// <summary>
+        /// memcache need not to implement this function.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public string QueryWithType(string key, CacheKeyType type)
+        {
+            throw new NotImplementedException();
+        }
+
+        public CacheKeyType Type(string key)
+        {
+            return CacheKeyType.String;
+        }
     }
 }

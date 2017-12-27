@@ -10,5 +10,9 @@ namespace CacheManager.Caching
         IEnumerable<string> Query(string[] keys);
 
         bool Clear(string key);
+
+        string QueryWithType(string key, CacheKeyType type);
+
+        CacheKeyType Type(string key);
     }
 }

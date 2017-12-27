@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CacheManager.Caching.Redis;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
