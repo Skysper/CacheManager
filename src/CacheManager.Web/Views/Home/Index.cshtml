@@ -23,7 +23,7 @@
                     <input type="text" v-model="inputKey" class="form-control input-search-key" />
                 </div>
                 <div class="col-sm-2 col-xs-5">
-                    <input type="button" href="javascript:;" class="btn btn-primary" value="查找" v-on:click="search" />
+                    <input type="button" href="javascript:;" class="btn btn-primary" value="查找" v-on:click="research" />
                 </div>
             </div>
 
@@ -34,7 +34,9 @@
                         <tr>
                             <th></th>
                             <th>键</th>
+                            <th>类型</th>
                             <th>值</th>
+                            <th>过期时间</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -42,9 +44,11 @@
                         <tr v-for="item in items">
                             <td>{{item.index}}</td>
                             <td>{{item.key}}</td>
+                            <td>{{item.type}}</td>
                             <td>{{item.value}}</td>
+                            <td>{{item.expire}}</td>
                             <td>
-                                @*<a href="javascript:;" class="btn btn-primary" v-on:click="viewCache(item)">查看</a>*@
+                                <a href="javascript:;" class="btn btn-primary" v-on:click="viewCache(item)">详细</a>
                                 <a href="javascript:;" class="btn btn-primary" v-on:click="clearCache(item)">清除缓存</a>
                             </td>
                         </tr>
@@ -83,6 +87,10 @@
                 noData: true,
             },
             methods: {
+                research: function () {
+                    this.pageIndex = 1;
+                    this.search();
+                },
                 search: function () {
                     var self = this;
                     self.noData = false;
@@ -152,6 +160,10 @@
                         if (from < 1) {
                             from = 1;
                         }
+                    }
+                    if (to > maxPage)
+                    { 
+                        to = maxPage;
                     }
 
                     for (var i = from; i <= to; i++)

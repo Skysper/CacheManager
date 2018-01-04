@@ -12,5 +12,9 @@ namespace CacheManager.Caching
         public string Key { set; get; }
         //缓存值
         public string Value { set; get; }
+
+        public string Expire { set; get; }
+
+        public string Type { set; get; }
     }
 }

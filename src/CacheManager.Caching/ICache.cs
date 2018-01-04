@@ -16,5 +16,8 @@ namespace CacheManager.Caching
         CacheKeyType Type(string key);
 
         void Close();
+        List<CacheKeyType> Type(string[] keys);
+
+        List<TimeSpan?> Expire(string[] keys);
     }
 }

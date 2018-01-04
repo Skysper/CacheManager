@@ -47,5 +47,15 @@ namespace CacheManager.Caching
         {
             return;
         }
+
+        public List<CacheKeyType> Type(string[] keys)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<TimeSpan?> Expire(string[] keys)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

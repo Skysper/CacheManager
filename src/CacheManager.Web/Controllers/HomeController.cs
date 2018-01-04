@@ -90,18 +90,24 @@ namespace CacheManager.Web.Controllers
                 keyCount = 1;
             }
 
-            var queryResult = cache.Query(keys.ToArray());
+            var keyArray = keys.ToArray();
+            var keyResult = cache.Query(keys.ToArray());
+            var expireResult = cache.Expire(keys.ToArray());
+            var typeResult = cache.Type(keys.ToArray());
+
             cache.Close();
 
             List<CacheResult> list = new List<CacheResult>();
-            if (queryResult != null)
+            if (keyResult != null)
             {
-                var resultList = queryResult.ToList();
+                var resultList = keyResult.ToList();
                 for (int i = 0; i < resultList.Count; i++)
                 {
                     Caching.CacheResult cr = new Caching.CacheResult();
                     cr.Index = i + 1;
                     cr.Key = keys[i];
+                    cr.Expire = expireResult[i].HasValue ? (expireResult[i].Value.TotalSeconds + "s") : "";
+                    cr.Type = typeResult[i].ToString();
                     cr.Value = resultList[i];
                     list.Add(cr);
                 }

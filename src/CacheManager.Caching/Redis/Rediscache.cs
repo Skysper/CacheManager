@@ -86,9 +86,10 @@ namespace CacheManager.Caching.Redis
                 if (_isCluster)
                 {
                     List<string> list = new List<string>();
+                    var db = _client.GetDatabase();
                     foreach (var key in keys)
                     {
-                        string value = _client.GetDatabase().StringGet(key);
+                        string value = db.StringGet(key);
                         if (!string.IsNullOrEmpty(value))
                         {
                             list.Add(value);
@@ -123,6 +124,28 @@ namespace CacheManager.Caching.Redis
                 return CacheKeyType.None;
             }
         }
+
+        public List<CacheKeyType> Type(string[] keys) {
+            var db = _client.GetDatabase();
+            List<CacheKeyType> list = new List<CacheKeyType>();
+            foreach (var key in keys) {
+                var type = (CacheKeyType)((int)db.KeyType(key));
+                list.Add(type);
+            }
+            return list;
+        }
+
+        public List<TimeSpan?> Expire(string[] keys) {
+            var db = _client.GetDatabase();
+            List<TimeSpan?> list = new List<TimeSpan?>();
+            foreach (var key in keys)
+            {
+                TimeSpan? span = db.KeyTimeToLive(key, CommandFlags.PreferSlave);
+                list.Add(span);
+            }
+            return list;
+        }
+
 
         /// <summary>
         /// redis连接客户端
