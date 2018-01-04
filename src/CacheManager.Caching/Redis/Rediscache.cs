@@ -3,25 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Net;
 
 namespace CacheManager.Caching.Redis
 {
     internal class Rediscache : ICache
     {
-        private readonly string _conn;
+        private string _conn;
+        private ConnectionMultiplexer _client;
+        private bool _isCluster;
         public Rediscache(string conn)
         {
-            _conn = conn;
+            InitClient(conn);
         }
 
         public bool Clear(string key)
         {
             try
             {
-                using (var client = ConnectionMultiplexer.Connect(_conn))
-                {
-                    return client.GetDatabase().KeyDelete(key);
-                }
+                return _client.GetDatabase().KeyDelete(key);
             }
             catch (Exception ex)
             {
@@ -33,10 +33,7 @@ namespace CacheManager.Caching.Redis
         {
             try
             {
-                using (var client = ConnectionMultiplexer.Connect(_conn))
-                {
-                    return client.GetDatabase().StringGet(key);
-                }
+                return _client.GetDatabase().StringGet(key);
             }
             catch (Exception ex)
             {
@@ -48,32 +45,29 @@ namespace CacheManager.Caching.Redis
         {
             try
             {
-                using (var client = ConnectionMultiplexer.Connect(_conn))
+                IDatabase database = _client.GetDatabase();
+                IOperator operate = null;
+                switch (type)
                 {
-                    IDatabase database = client.GetDatabase();
-                    IOperator operate = null;
-                    switch (type)
-                    {
-                        case CacheKeyType.None: break;
-                        case CacheKeyType.String:
-                            operate = new RedisString();
-                            break;
-                        case CacheKeyType.Hash:
-                            operate = new RedisHash();
-                            break;
-                        case CacheKeyType.List:
-                            operate = new RedisList();
-                            break;
-                        case CacheKeyType.Set:
-                            operate = new RedisSet();
-                            break;
-                        case CacheKeyType.SortedSet:
-                            operate = new RedisSortedSet();
-                            break;
-                    }
-                    if (operate == null) return string.Empty;
-                    else return operate.Format(database, key);
+                    case CacheKeyType.None: break;
+                    case CacheKeyType.String:
+                        operate = new RedisString();
+                        break;
+                    case CacheKeyType.Hash:
+                        operate = new RedisHash();
+                        break;
+                    case CacheKeyType.List:
+                        operate = new RedisList();
+                        break;
+                    case CacheKeyType.Set:
+                        operate = new RedisSet();
+                        break;
+                    case CacheKeyType.SortedSet:
+                        operate = new RedisSortedSet();
+                        break;
                 }
+                if (operate == null) return string.Empty;
+                else return operate.Format(database, key);
             }
             catch (Exception ex)
             {
@@ -89,9 +83,26 @@ namespace CacheManager.Caching.Redis
 
             try
             {
-                using (var client = ConnectionMultiplexer.Connect(_conn))
+                if (_isCluster)
                 {
-                    var values = client.GetDatabase().StringGet(redisKeys);
+                    List<string> list = new List<string>();
+                    foreach (var key in keys)
+                    {
+                        string value = _client.GetDatabase().StringGet(key);
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            list.Add(value);
+                        }
+                        else
+                        {
+                            list.Add("");
+                        }
+                    }
+                    return list;
+                }
+                else
+                {
+                    var values = _client.GetDatabase().StringGet(redisKeys);
                     return values.Select(val => (string)val);
                 }
             }
@@ -105,14 +116,48 @@ namespace CacheManager.Caching.Redis
         {
             try
             {
-                using (var client = ConnectionMultiplexer.Connect(_conn))
-                {
-                    return  (CacheKeyType)((int)client.GetDatabase().KeyType(key));
-                }
+                return (CacheKeyType)((int)_client.GetDatabase().KeyType(key));
             }
             catch (Exception ex)
             {
                 return CacheKeyType.None;
+            }
+        }
+
+        /// <summary>
+        /// redis连接客户端
+        /// </summary>
+        /// <returns></returns>
+        private void InitClient(string conn)
+        {
+            _conn = conn;
+            string[] array = _conn.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if (array.Length > 1)
+            {
+                _isCluster = true;
+                string[] ipAndPortArray = new string[array.Length * 2];
+                ConfigurationOptions options = new ConfigurationOptions();
+                List<EndPoint> endPoints = new List<EndPoint>();
+                for (int i = 0; i < array.Length; i++)
+                {
+                    options.EndPoints.Add(array[i]);
+                }
+                options.AllowAdmin = true;
+                _client = ConnectionMultiplexer.Connect(options);
+            }
+            else
+            {
+                _isCluster = false;
+                _client = ConnectionMultiplexer.Connect(_conn);
+            }
+        }
+
+        public void Close()
+        {
+            if (_client != null)
+            {
+                _client.Close();
+                _client = null;
             }
         }
     }

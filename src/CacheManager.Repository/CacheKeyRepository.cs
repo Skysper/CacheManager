@@ -57,6 +57,22 @@ namespace CacheManager.Repository
             }
         }
 
+        public List<Model.CacheKey> FindByAppIds(List<int> ids) {
+            if (ids.Count == 0)
+            {
+                return null;
+            }
+
+            string idStr = string.Join(",", ids);
+            List<Model.CacheKey> list = new List<CacheKey>();
+            using (MySqlConnection dbConnection = Connection)
+            {
+                dbConnection.Open();
+                return dbConnection.Query<Model.CacheKey>($"Select * from {TableName} where AppId in ({idStr})").ToList();
+            }
+        }
+
+
         public List<Model.CacheKey> FindByPage(int appId, string key, int pageIndex, int pageSize)
         {
             using (MySqlConnection dbConnection = Connection)

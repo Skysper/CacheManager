@@ -14,5 +14,7 @@ namespace CacheManager.Caching
         string QueryWithType(string key, CacheKeyType type);
 
         CacheKeyType Type(string key);
+
+        void Close();
     }
 }

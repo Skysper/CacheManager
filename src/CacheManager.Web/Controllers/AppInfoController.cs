@@ -82,7 +82,8 @@ namespace CacheManager.Web.Controllers
 
         public IActionResult All(string key, int? pageIndex, int? pageSize)
         {
-            return Json(_repos.FindAll());
+            var result = _repos.FindAll().ToList();
+            return Json(result);
         }
 
         public IActionResult Search(string key, int? pageIndex, int? pageSize)

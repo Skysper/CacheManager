@@ -42,5 +42,10 @@ namespace CacheManager.Caching
         {
             return CacheKeyType.String;
         }
+
+        public void Close()
+        {
+            return;
+        }
     }
 }

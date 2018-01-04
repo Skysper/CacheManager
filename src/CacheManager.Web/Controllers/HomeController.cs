@@ -43,6 +43,8 @@ namespace CacheManager.Web.Controllers
             var cache = Caching.CacheFactory.CreateCache(Caching.CacheType.Rediscache, app.ConnectionString);
 
             bool isOk = cache.Clear(key);
+
+            cache.Close();
             return Json(new { Ok = isOk ? 1 : 0, Msg = "" });
 
         }
@@ -89,6 +91,8 @@ namespace CacheManager.Web.Controllers
             }
 
             var queryResult = cache.Query(keys.ToArray());
+            cache.Close();
+
             List<CacheResult> list = new List<CacheResult>();
             if (queryResult != null)
             {

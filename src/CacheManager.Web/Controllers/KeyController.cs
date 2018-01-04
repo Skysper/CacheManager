@@ -99,7 +99,7 @@ namespace CacheManager.Web.Controllers
             }
             var array = ids.Split(',').Select(int.Parse).ToList();
 
-            var nodes = _repository.FindByIds(array);
+            var nodes = _repository.FindByAppIds(array);
             return Json(nodes);
         }
 
