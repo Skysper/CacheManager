@@ -7,6 +7,7 @@ using CacheManager.Repository;
 using CacheManager.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft​.Extensions​.Options;
+using CacheManager.Service;
 using CacheManager.Caching;
 
 namespace CacheManager.Web.Controllers
@@ -27,26 +28,58 @@ namespace CacheManager.Web.Controllers
             return View();
         }
 
-        public IActionResult ClearCache(string key, int? appId)
+        private AppInfo _app;
+
+        private IActionResult ValidateKeyAndAppInfo(string key, int? appId)
         {
-            if (!appId.HasValue || string.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
-                return Json(new { Ok = 0, Msg = "未获取appId" });
+                return Json(new { Ok = 0, Msg = "键值为空" });
             }
 
-            Model.AppInfo app = _repository.FindById(appId.Value);
-            if (app == null)
+
+
+            if (!appId.HasValue)
+            {
+                return Json(new { Ok = 0, Msg = "未获取到appId" });
+            }
+            _app = _repository.FindById(appId.Value);
+
+            if (_app == null)
             {
                 return Json(new { Ok = 0, Msg = "未获取到app信息" });
             }
+            return null;
+        }
 
-            var cache = Caching.CacheFactory.CreateCache(Caching.CacheType.Rediscache, app.ConnectionString);
+        public IActionResult ClearCache(string key, int? appId)
+        {
+            IActionResult result = ValidateKeyAndAppInfo(key, appId);
+            if (result != null)
+            {
+                return result;
+            }
+
+            var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, _app.ConnectionString);
 
             bool isOk = cache.Clear(key);
 
             cache.Close();
             return Json(new { Ok = isOk ? 1 : 0, Msg = "" });
 
+        }
+
+        public IActionResult More(string key, int? appId)
+        {
+            IActionResult result = ValidateKeyAndAppInfo(key, appId);
+            if (result != null)
+            {
+                return result;
+            }
+
+            ICacheService service = new CacheService();
+            Caching.CacheResult cacheResult = service.Query(_app, key);
+            return Json(new { Ok = 1, Data = cacheResult, Msg = "" });
         }
 
 
@@ -63,7 +96,7 @@ namespace CacheManager.Web.Controllers
                 return Content("[]");
             }
 
-            var cache = Caching.CacheFactory.CreateCache(Caching.CacheType.Rediscache, app.ConnectionString);
+            var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
 
             var ra = new RangeAnalysis(key);
             string format = ra.Format();
@@ -116,7 +149,8 @@ namespace CacheManager.Web.Controllers
             //if the cache connection string is error
             //the cache result list will return null
             //then reset the key count to 0
-            if (list == null || list.Count == 0) {
+            if (list == null || list.Count == 0)
+            {
                 keyCount = 0;
             }
             return Json(new { Count = keyCount, Data = list });

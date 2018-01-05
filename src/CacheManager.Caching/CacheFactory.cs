@@ -12,7 +12,7 @@ namespace CacheManager.Caching
 
         }
 
-        public static ICache CreateCache(CacheType type,string conn)
+        public static ICache Create(CacheType type,string conn)
         {
             switch (type)
             {
@@ -25,5 +25,11 @@ namespace CacheManager.Caching
 
             }
         }
+
+        public static ICache Create(int type, string conn) {
+            CacheType cacheType = (CacheType)type;
+            return Create(cacheType, conn); 
+        }
+
     }
 }

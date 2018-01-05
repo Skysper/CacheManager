@@ -57,5 +57,10 @@ namespace CacheManager.Caching
         {
             throw new NotImplementedException();
         }
+
+        public TimeSpan? Expire(string key)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

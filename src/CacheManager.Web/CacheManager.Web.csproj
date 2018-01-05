@@ -57,6 +57,7 @@
     <ProjectReference Include="..\CacheManager.Caching\CacheManager.Caching.csproj" />
     <ProjectReference Include="..\CacheManager.Model\CacheManager.Model.csproj" />
     <ProjectReference Include="..\CacheManager.Repository\CacheManager.Repository.csproj" />
+    <ProjectReference Include="..\CacheManager.Service\CacheManager.Service.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.json">

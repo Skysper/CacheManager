@@ -41,6 +41,14 @@ namespace CacheManager.Caching.Redis
             }
         }
 
+        /// <summary>
+        /// query and format the value result by cache key type
+        /// Hash、List、Set and String etc.
+        /// they all has different format in order to modify by client
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public string QueryWithType(string key, CacheKeyType type)
         {
             try
@@ -125,17 +133,20 @@ namespace CacheManager.Caching.Redis
             }
         }
 
-        public List<CacheKeyType> Type(string[] keys) {
+        public List<CacheKeyType> Type(string[] keys)
+        {
             var db = _client.GetDatabase();
             List<CacheKeyType> list = new List<CacheKeyType>();
-            foreach (var key in keys) {
+            foreach (var key in keys)
+            {
                 var type = (CacheKeyType)((int)db.KeyType(key));
                 list.Add(type);
             }
             return list;
         }
 
-        public List<TimeSpan?> Expire(string[] keys) {
+        public List<TimeSpan?> Expire(string[] keys)
+        {
             var db = _client.GetDatabase();
             List<TimeSpan?> list = new List<TimeSpan?>();
             foreach (var key in keys)
@@ -182,6 +193,12 @@ namespace CacheManager.Caching.Redis
                 _client.Close();
                 _client = null;
             }
+        }
+
+        public TimeSpan? Expire(string key)
+        {
+            var db = _client.GetDatabase();
+            return db.KeyTimeToLive(key, CommandFlags.PreferSlave);
         }
     }
 }
