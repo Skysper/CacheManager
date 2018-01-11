@@ -113,7 +113,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" v-on:click="changeLayerStatus">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-primary" v-on:click="save">Save changes</button>
                 </div>
             </div>
         </div>
@@ -242,8 +242,7 @@
                             vm.search();
                         }
                     });
-                },
-                changeLayerStatus: function () {
+                }, changeLayerStatus: function () {
                     this.layerShowStatus = !this.layerShowStatus;
                 },
                 viewMore: function (item) {
@@ -260,6 +259,18 @@
                             vm.changeLayerStatus();
                         }
                     })
+                }, save: function () {
+                    var model = { appId: this.appId, key: this.viewKey, type: this.initType, value: this.initValue };
+                    if (this.resetTTL) {
+                        model.timeToLive = this.initTTL;
+                    } else {
+                        model.timeToLive = 0;
+                    }
+
+                    $.post("@Url.Action("Save")", model, function (result) {
+                        console.log(result);
+                    });
+
                 }
             }
         });

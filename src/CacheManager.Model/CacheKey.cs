@@ -1,6 +1,6 @@
 namespace CacheManager.Model
 {
-    public class CacheKey:BaseEntity
+    public class CacheKey : BaseEntity
     {
 
         //key name
@@ -10,7 +10,7 @@ namespace CacheManager.Model
         public string Description { set; get; }
 
         //app id
-        public int AppId{set;get;}
+        public int AppId { set; get; }
 
     }
 }

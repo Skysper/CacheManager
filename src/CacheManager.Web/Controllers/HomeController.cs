@@ -82,6 +82,11 @@ namespace CacheManager.Web.Controllers
             return Json(new { Ok = 1, Data = cacheResult, Msg = "" });
         }
 
+        public IActionResult Save(Model.KeySaveModel model)
+        {
+            return Json(new { Ok = 1, Msg = "" });
+        }
+
 
         public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId)
         {
