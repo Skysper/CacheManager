@@ -54,32 +54,61 @@ namespace CacheManager.Caching.Redis
             try
             {
                 IDatabase database = _client.GetDatabase();
-                IOperator operate = null;
+                IOperator op = null;
                 switch (type)
                 {
                     case CacheKeyType.None: break;
                     case CacheKeyType.String:
-                        operate = new RedisString();
+                        op = new RedisString();
                         break;
                     case CacheKeyType.Hash:
-                        operate = new RedisHash();
+                        op = new RedisHash();
                         break;
                     case CacheKeyType.List:
-                        operate = new RedisList();
+                        op = new RedisList();
                         break;
                     case CacheKeyType.Set:
-                        operate = new RedisSet();
+                        op = new RedisSet();
                         break;
                     case CacheKeyType.SortedSet:
-                        operate = new RedisSortedSet();
+                        op = new RedisSortedSet();
                         break;
                 }
-                if (operate == null) return string.Empty;
-                else return operate.Format(database, key);
+                if (op == null) return string.Empty;
+                else return op.Format(database, key);
             }
             catch (Exception ex)
             {
                 return string.Empty;
+            }
+        }
+
+        public bool Set(string key, CacheKeyType type, string value, int timeToLive)
+        {
+            IDatabase database = _client.GetDatabase();
+            IOperator op = null;
+            switch (type)
+            {
+                case CacheKeyType.None:
+                case CacheKeyType.String:
+                    op = new RedisString();
+                    break;
+                case CacheKeyType.Hash:
+                    op = new RedisHash();
+                    break;
+                case CacheKeyType.List:
+                    op = new RedisList();
+                    break;
+                case CacheKeyType.Set:
+                    op = new RedisSet();
+                    break;
+                case CacheKeyType.SortedSet:
+                    op = new RedisSortedSet();
+                    break;
+            }
+            if (op == null) { return false; }
+            else {
+                return op.Set(database, key, value, timeToLive);
             }
         }
 

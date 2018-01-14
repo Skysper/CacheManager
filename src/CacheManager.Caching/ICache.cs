@@ -21,5 +21,7 @@ namespace CacheManager.Caching
         List<TimeSpan?> Expire(string[] keys);
 
         TimeSpan? Expire(string key);
+
+        bool Set(string key, CacheKeyType type, string value, int timeToLive);
     }
 }

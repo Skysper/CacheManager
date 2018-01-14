@@ -97,6 +97,7 @@
                                     <option value="2">List</option>
                                     <option value="3">Set</option>
                                     <option value="4">SortedSet</option>
+                                    <option value="5">Hash</option>
                                 </select>
                             </div>
                             <div class="col-sm-3">
@@ -266,9 +267,10 @@
                     } else {
                         model.timeToLive = 0;
                     }
-
+                    var vm = this;
                     $.post("@Url.Action("Save")", model, function (result) {
                         console.log(result);
+                        vm.search();
                     });
 
                 }

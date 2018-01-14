@@ -84,7 +84,23 @@ namespace CacheManager.Web.Controllers
 
         public IActionResult Save(Model.KeySaveModel model)
         {
-            return Json(new { Ok = 1, Msg = "" });
+            //
+            if (model.AppId <= 0)
+            {
+                return Json(new JsonMsg() { Ok = 0, Msg = "" });
+            }
+
+            Model.AppInfo app = _repository.FindById(model.AppId);
+            if (app == null)
+            {
+                return Json(MsgConst.GetErrorMsg());
+            }
+
+            var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
+            bool isOk = cache.Set(model.Key, model.Type, model.Value, model.TimeToLive);
+
+
+            return Json(MsgConst.GetOkMsg());
         }
 
 

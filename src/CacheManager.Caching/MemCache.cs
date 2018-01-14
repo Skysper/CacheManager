@@ -62,5 +62,10 @@ namespace CacheManager.Caching
         {
             throw new NotImplementedException();
         }
+
+        public bool Set(string key, CacheKeyType type, string value, int timeToLive)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
