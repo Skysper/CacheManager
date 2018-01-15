@@ -155,7 +155,13 @@
                 search: function () {
                     var self = this;
                     self.noData = false;
-                    $.get("@Url.Action("Search")", { "key": self.inputKey, "appId": self.appId, "pageSize": self.pageSize, "pageIndex": self.pageIndex }, function (result) {
+                    $.get("@Url.Action("Search")", {
+                        "key": self.inputKey,
+                        "appId": self.appId,
+                        "pageSize": self.pageSize,
+                        "pageIndex": self.pageIndex,
+                        "ignoreType":false
+                    }, function (result) {
                         console.log("search querey succeed!");
                         if (result.count > 0) {
                             self.items = result.data;

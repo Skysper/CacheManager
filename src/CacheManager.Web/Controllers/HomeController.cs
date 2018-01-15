@@ -79,36 +79,47 @@ namespace CacheManager.Web.Controllers
 
             ICacheService service = new CacheService();
             Caching.CacheResult cacheResult = service.Query(_app, key);
-            return Json(new { Ok = 1, Data = cacheResult, Msg = "" });
+            return Json(new DataJsonMsg(MsgConst.OK, "", cacheResult));
         }
 
         public IActionResult Save(Model.KeySaveModel model)
         {
-            //
             if (model.AppId <= 0)
             {
-                return Json(new JsonMsg() { Ok = 0, Msg = "" });
+                return Json(new JsonMsg(MsgConst.ERROR,""));
             }
 
             Model.AppInfo app = _repository.FindById(model.AppId);
             if (app == null)
             {
-                return Json(MsgConst.GetErrorMsg());
+                return Json(new JsonMsg(MsgConst.ERROR,""));
             }
 
             var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
             bool isOk = cache.Set(model.Key, model.Type, model.Value, model.TimeToLive);
 
 
-            return Json(MsgConst.GetOkMsg());
+            return Json(new JsonMsg(MsgConst.OK, ""));
         }
 
 
-        public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId)
+        public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId, bool? ignoreType)
         {
             if (!appId.HasValue)
             {
                 return Content("[]");
+            }
+
+            if (!pageIndex.HasValue)
+            {
+                pageIndex = 1;
+            }
+            if (!pageSize.HasValue)
+            {
+                pageSize = 50;
+            }
+            if (!ignoreType.HasValue) {
+                ignoreType = true;
             }
 
             Model.AppInfo app = _repository.FindById(appId.Value);
@@ -117,64 +128,9 @@ namespace CacheManager.Web.Controllers
                 return Content("[]");
             }
 
-            var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
-
-            var ra = new RangeAnalysis(key);
-            string format = ra.Format();
-            List<Ranges> ranges = ra.Analysis();
-
-            int keyCount = 0;
-            List<string> keys = new List<string>();
-            if (ranges.Count > 0)
-            {
-                if (!pageIndex.HasValue)
-                {
-                    pageIndex = 1;
-                }
-                if (!pageSize.HasValue)
-                {
-                    pageSize = 50;
-                }
-                keys = KeyManager.GetPagedKeys(format, ranges, pageIndex.Value, pageSize.Value);
-                keyCount = KeyManager.GetKeysCount(ranges);
-            }
-            else
-            {
-                keys.Add(key);
-                keyCount = 1;
-            }
-
-            var keyArray = keys.ToArray();
-            var keyResult = cache.Query(keys.ToArray());
-            var expireResult = cache.Expire(keys.ToArray());
-            var typeResult = cache.Type(keys.ToArray());
-
-            cache.Close();
-
-            List<CacheResult> list = new List<CacheResult>();
-            if (keyResult != null)
-            {
-                var resultList = keyResult.ToList();
-                for (int i = 0; i < resultList.Count; i++)
-                {
-                    Caching.CacheResult cr = new Caching.CacheResult();
-                    cr.Index = i + 1;
-                    cr.Key = keys[i];
-                    cr.Expire = expireResult[i].HasValue ? (expireResult[i].Value.TotalSeconds + "s") : "";
-                    cr.Type = typeResult[i].ToString();
-                    cr.Value = resultList[i];
-                    list.Add(cr);
-                }
-            }
-
-            //if the cache connection string is error
-            //the cache result list will return null
-            //then reset the key count to 0
-            if (list == null || list.Count == 0)
-            {
-                keyCount = 0;
-            }
-            return Json(new { Count = keyCount, Data = list });
+            ICacheService service = new CacheService();
+            PagedDataJsonMsg result =  service.Search(app, key, pageIndex.Value, pageSize.Value, !ignoreType.Value);
+            return Json(result);
         }
 
     }
