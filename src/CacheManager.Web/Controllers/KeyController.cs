@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using CacheManager.Model;
 using Microsoft.Extensions.Options;
 using CacheManager.Repository;
+using CacheManager.Service;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,12 +15,12 @@ namespace CacheManager.Web.Controllers
     public class KeyController : Controller
     {
         private readonly AppSettings _settings;
-        private CacheKeyRepository _repository;
+        private IKeyService _keyService;
 
         public KeyController(IOptions<AppSettings> settings)
         {
             _settings = settings.Value;
-            _repository = new CacheKeyRepository(_settings.ConnectionString);
+            _keyService = new KeyService(_settings.ConnectionString);
         }
 
         public IActionResult Index()
@@ -29,42 +30,14 @@ namespace CacheManager.Web.Controllers
 
         public IActionResult Delete(int id)
         {
-            try
-            {
-                _repository.Remove(id);
-                return Json(new { Ok = 1, Msg = "" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { Ok = 0, Msg = ex.Message });
-            }
-
+            bool isOk = _keyService.Remove(id);
+            return Json(new JsonMsg(isOk ? MsgConst.OK : MsgConst.ERROR));
         }
 
-        public IActionResult Save(int id, string name, string descrption, int appId)
+        public IActionResult Save(int id, string name, string description, int appId)
         {
-            Model.CacheKey key = new CacheKey();
-            key.AppId = appId;
-            key.Id = id;
-            key.Name = name;
-            key.Description = descrption;
-
-            try
-            {
-                if (key.Id <= 0)
-                {
-                    _repository.Add(key);
-                }
-                else
-                {
-                    _repository.Update(key);
-                }
-                return Json(new { Ok = 1, Msg = "" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { Ok = 0, Msg = ex.Message });
-            }
+            bool isOk = _keyService.Save(id, name, description, appId);
+            return Json(new JsonMsg(isOk ? MsgConst.OK : MsgConst.ERROR));
         }
 
 
@@ -85,26 +58,14 @@ namespace CacheManager.Web.Controllers
             {
                 pageIndex = 1;
             }
-            return Json(_repository.FindByPage(appId.Value, key, pageIndex.Value, pageSize.Value));
+            return Json(_keyService.Search(key, appId.Value, pageIndex.Value, pageSize.Value));
         }
-
 
         public IActionResult All(string ids)
         {
-            List<Model.CacheKey> list = new List<CacheKey>();
-
-            if (string.IsNullOrEmpty(ids))
-            {
-                return Json(list);
-            }
-            var array = ids.Split(',').Select(int.Parse).ToList();
-
-            var nodes = _repository.FindByAppIds(array);
+            var nodes = _keyService.All(ids);
             return Json(nodes);
         }
-
-
-
 
     }
 }

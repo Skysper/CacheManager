@@ -4,8 +4,19 @@ using System.Text;
 
 namespace CacheManager.Model
 {
-    public class AppInfo:BaseEntity
+    public class App:BaseEntity
     {
+        public App() { }
+        public App(int id, string name, string description, string identity, int type, string connectionString)
+        {
+            this.Id = id;
+            this.Name = name;
+            this.Description = description;
+            this.Identity = identity;
+            this.Type = type;
+            this.ConnectionString = connectionString;
+        }
+
         /// <summary>
         /// 名称
         /// </summary>

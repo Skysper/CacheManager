@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CacheManager.Model\CacheManager.Model.csproj" />
+    <ProjectReference Include="..\CacheManager.Repository\CacheManager.Repository.csproj" />
   </ItemGroup>
 
 </Project>

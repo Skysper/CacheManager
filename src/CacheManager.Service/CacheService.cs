@@ -9,7 +9,7 @@ namespace CacheManager.Service
 {
     public class CacheService : ICacheService
     {
-        public CacheResult Query(AppInfo app, string key)
+        public CacheResult Query(App app, string key)
         {
             var cache = Caching.CacheFactory.Create(app.Type, app.ConnectionString);
             CacheKeyType type = cache.Type(key);
@@ -37,7 +37,7 @@ namespace CacheManager.Service
         /// false will search key result one by one with key type result
         /// (warning:it may cost more time to finish the query)</param>
         /// <returns></returns>
-        public PagedDataJsonMsg Search(AppInfo app, string keyFormat, int pageIndex, int pageSize, bool ignoreType = true)
+        public PagedDataJsonMsg Search(App app, string keyFormat, int pageIndex, int pageSize, bool ignoreType = true)
         {
             var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
 

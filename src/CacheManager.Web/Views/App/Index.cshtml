@@ -97,7 +97,7 @@
                 search: function () {
                     var vm = this;
                     vm.noData = false;
-                    $.get("@Url.Action("Search")", { "key": this.inputKey, "appId": this.appId }, function (data) {
+                    $.get("@Url.Action("Search")", { "key": this.inputKey }, function (data) {
                          console.log("search querey succeed!");
                          if (typeof data === 'string')
                          {
@@ -130,10 +130,9 @@
                 },
                 appDelete: function (item)
                 {
-                    this.nodeId = item.id;
                     if (confirm("确定要删除吗?"))
                     {
-                        $.post("@Url.Action("Delete")", { "id": this.nodeId }, function (data) {
+                        $.post("@Url.Action("Delete")", { "id": item.id }, function (data) {
                             if (data.ok) {
                                 vm.search();
                             } else {
@@ -166,63 +165,6 @@
             }
         });
         vm.search();
-
-
-        (function ($) {
-            var apps = null;
-            function initApps(datas)
-            {
-                apps = [];
-                appIds = [];
-                $.each(datas, function (index, app) {
-                    apps.push({
-                        text: app.name,
-                        nodes: [],
-                        id: app.id,
-                        type: 'app'
-                    });
-                });
-            }
-
-            var $searchableTree = null;
-            $.get("@Url.Action("All","AppInfo")", function (datas) {
-                initApps(datas);
-                initTreeView(apps);
-            }).error(function () {
-                 initTreeView([]);
-             });
-
-            function initTreeView(apps)
-            {
-                $searchableTree = $('#treeview-searchable').treeview({
-                    data: apps,
-                    onNodeSelected: function (event, data)
-                    {
-                        console.log(data);
-                        if (data.type == "app")
-                        {
-                            vm.appId = data.id;
-                            vm.appName = data.text;
-                            vm.search();
-                        }
-                    }
-                });
-            }
-
-            var search = function (e) {
-                var pattern = $('#input-search').val();
-                var options = {
-                    ignoreCase: $('#chk-ignore-case').is(':checked'),
-                    exactMatch: $('#chk-exact-match').is(':checked'),
-                    revealResults: $('#chk-reveal-results').is(':checked')
-                };
-                $searchableTree.treeview('search', [pattern, options]);
-            }
-
-            $('#input-search').on('keyup', search);
-        }(jQuery));
-
-
 
     </script>
 }

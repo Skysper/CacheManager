@@ -8,14 +8,14 @@ using System.Linq;
 
 namespace CacheManager.Repository
 {
-    public class AppInfoRepository : BaseRepository<Model.AppInfo>
+    public class AppRepository : BaseRepository<Model.App>
     {
-        public AppInfoRepository(string connectionString) : base(connectionString, "AppInfo")
+        public AppRepository(string connectionString) : base(connectionString, "AppInfo")
         {
 
         }
 
-        public override void Add(AppInfo item)
+        public override void Add(App item)
         {
             using (MySqlConnection dbConnection = Connection)
             {
@@ -24,7 +24,7 @@ namespace CacheManager.Repository
             }
         }
 
-        public override void Update(AppInfo item)
+        public override void Update(App item)
         {
             using (MySqlConnection dbConnection = Connection)
             {
@@ -33,7 +33,7 @@ namespace CacheManager.Repository
             }
         }
 
-        public List<AppInfo> FindByPage(string key, int pageIndex, int pageSize)
+        public List<App> FindByPage(string key, int pageIndex, int pageSize)
         {
             using (MySqlConnection dbConnection = Connection)
             {
@@ -45,7 +45,7 @@ namespace CacheManager.Repository
                 int limit = (pageIndex - 1) * pageSize;
                 str.Append($" order by id desc limit {limit},{pageSize} ");
                 dbConnection.Open();
-                return dbConnection.Query<AppInfo>(str.ToString()).ToList();
+                return dbConnection.Query<App>(str.ToString()).ToList();
             }
         }
     }

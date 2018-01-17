@@ -347,7 +347,7 @@
             }
 
             var $searchableTree = null;
-            $.get("@Url.Action("All","AppInfo")", function (datas) {
+            $.get("@Url.Action("Search","App")", function (datas) {
                 initApps(datas);
                 $.post("@Url.Action("All","Key")", { "ids": appIds.join(',') }, function (nodes) {
                     initNodes(nodes);

@@ -15,12 +15,12 @@ namespace CacheManager.Web.Controllers
     public class HomeController : Controller
     {
         private readonly AppSettings _settings;
-        CacheManager.Repository.AppInfoRepository _repository;
+        IAppService _appService;
 
         public HomeController(IOptions<AppSettings> settings)
         {
             _settings = settings.Value;
-            _repository = new AppInfoRepository(_settings.ConnectionString);
+            _appService = new AppService(_settings.ConnectionString);
         }
 
         public IActionResult Index()
@@ -28,26 +28,24 @@ namespace CacheManager.Web.Controllers
             return View();
         }
 
-        private AppInfo _app;
+        private App _app;
 
         private IActionResult ValidateKeyAndAppInfo(string key, int? appId)
         {
             if (string.IsNullOrEmpty(key))
             {
-                return Json(new { Ok = 0, Msg = "键值为空" });
+                return Json(new JsonMsg(MsgConst.ERROR, "键值为空"));
             }
-
-
 
             if (!appId.HasValue)
             {
-                return Json(new { Ok = 0, Msg = "未获取到appId" });
+                return Json(new JsonMsg(MsgConst.ERROR, "未获取到appId"));
             }
-            _app = _repository.FindById(appId.Value);
+            _app = _appService.Find(appId.Value);
 
             if (_app == null)
             {
-                return Json(new { Ok = 0, Msg = "未获取到app信息" });
+                return Json(new JsonMsg(MsgConst.ERROR, "未获取到app信息"));
             }
             return null;
         }
@@ -65,7 +63,7 @@ namespace CacheManager.Web.Controllers
             bool isOk = cache.Clear(key);
 
             cache.Close();
-            return Json(new { Ok = isOk ? 1 : 0, Msg = "" });
+            return Json(new JsonMsg(isOk ? MsgConst.OK : MsgConst.ERROR));
 
         }
 
@@ -86,13 +84,13 @@ namespace CacheManager.Web.Controllers
         {
             if (model.AppId <= 0)
             {
-                return Json(new JsonMsg(MsgConst.ERROR,""));
+                return Json(new JsonMsg(MsgConst.ERROR));
             }
 
-            Model.AppInfo app = _repository.FindById(model.AppId);
+            Model.App app = _appService.Find(model.AppId);
             if (app == null)
             {
-                return Json(new JsonMsg(MsgConst.ERROR,""));
+                return Json(new JsonMsg(MsgConst.ERROR));
             }
 
             var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
@@ -118,18 +116,19 @@ namespace CacheManager.Web.Controllers
             {
                 pageSize = 50;
             }
-            if (!ignoreType.HasValue) {
+            if (!ignoreType.HasValue)
+            {
                 ignoreType = true;
             }
 
-            Model.AppInfo app = _repository.FindById(appId.Value);
+            Model.App app = _appService.Find(appId.Value);
             if (app == null)
             {
                 return Content("[]");
             }
 
             ICacheService service = new CacheService();
-            PagedDataJsonMsg result =  service.Search(app, key, pageIndex.Value, pageSize.Value, ignoreType.Value);
+            PagedDataJsonMsg result = service.Search(app, key, pageIndex.Value, pageSize.Value, ignoreType.Value);
             return Json(result);
         }
 

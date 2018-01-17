@@ -210,7 +210,7 @@
             }
 
             var $searchableTree = null;
-            $.get("@Url.Action("All","AppInfo")", function (datas) {
+            $.get("@Url.Action("Search","App")", function (datas) {
                 initApps(datas);
                 initTreeView(apps);
             }).error(function () {

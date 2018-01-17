@@ -11,6 +11,9 @@ namespace CacheManager.Model
 
         }
 
+        public JsonMsg(int ok):this(ok,"")
+        {
+        }
         public JsonMsg(int ok, string msg)
         {
             this.Ok = ok;
