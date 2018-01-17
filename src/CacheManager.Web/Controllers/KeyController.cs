@@ -68,7 +68,7 @@ namespace CacheManager.Web.Controllers
         }
 
 
-        public IActionResult Search(string inputKey, int? appId, int? pageIndex, int? pageSize)
+        public IActionResult Search(string key, int? appId, int? pageIndex, int? pageSize)
         {
             if (!appId.HasValue)
             {
@@ -85,7 +85,7 @@ namespace CacheManager.Web.Controllers
             {
                 pageIndex = 1;
             }
-            return Json(_repository.FindByPage(appId.Value, inputKey, pageIndex.Value, pageSize.Value));
+            return Json(_repository.FindByPage(appId.Value, key, pageIndex.Value, pageSize.Value));
         }
 
 

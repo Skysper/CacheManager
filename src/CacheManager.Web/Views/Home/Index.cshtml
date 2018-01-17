@@ -18,14 +18,28 @@
             <div id="treeview-searchable" class=""></div>
         </div>
         <div class="search col-sm-8">
-            <div class="input-group">
-                <input type="text" placeholder="键值..." v-model="inputKey" class="form-control input-search-key" />
-                <span class="input-group-btn">
-                    <button class="btn btn-default" v-on:click="research" type="button">查找</button>
-                </span>
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input type="text" placeholder="键值..." v-model="inputKey" class="form-control input-search-key" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" v-on:click="research" type="button">查找</button>
+                        </span>
+                    </div>
+                </div>                
+                <div class="col-sm-3">
+                    <span class="checkbox">
+                        <label>
+                            <input v-model="ignoreType" type="checkbox"> 忽略类型
+                        </label>
+                    </span>
+                </div>
+            </div>
+            <div v-if="appConn != ''" style="padding:10px 0px 0px 0px">
+                连接字符串: {{appConn}}
             </div>
 
-            <div class="row" style="margin-top:15px;">
+            <div style="margin-top:15px;">
                 <div v-if="noData" class="text-center">未能获取到任何结果</div>
                 <table v-if="!noData" class="table table-striped table-bordered table-hover">
                     <thead>
@@ -131,7 +145,8 @@
             el: "#content",
             data: {
                 inputKey: "",
-                appId:0,
+                appId: 0,
+                appConn:"",
                 items: [],
                 pageSize: 50,
                 pageIndex: 1,
@@ -140,12 +155,18 @@
                 pages:[],
                 noData: true,
                 layerShowStatus: false,
+                ignoreType: false,
                 //properties for edit
                 viewKey: "",
                 initValue: "",
                 initTTL: "",
                 initType: 0,
                 resetTTL:false
+            },
+            watch: {
+                ignoreType(oldValue, newValue) {
+                    this.search();
+                }
             },
             methods: {
                 research: function () {
@@ -160,7 +181,7 @@
                         "appId": self.appId,
                         "pageSize": self.pageSize,
                         "pageIndex": self.pageIndex,
-                        "ignoreType":false
+                        "ignoreType": self.ignoreType
                     }, function (result) {
                         console.log("search querey succeed!");
                         if (result.count > 0) {
@@ -292,11 +313,13 @@
                 apps = [];
                 appIds = [];
                 $.each(datas, function (index, app) {
+                    console.log(app);
                     apps.push({
                         text: app.name,
                         nodes: [],
                         id: app.id,
-                        type: 'app'
+                        type: 'app',
+                        conn: app.connectionString
                     });
                     appIds.push(app.id);
                 });
@@ -306,13 +329,17 @@
             {
                 $.each(apps, function (index, app) {
                     $.each(nodes, function (index, node) {
+              
                         if (node.appId == app.id)
                         {
+                            console.log("node", node);
+                            console.log("app", app);
                             app.nodes.push({
                                 text: node.name,
                                 id: node.id,
                                 type: 'node',
-                                appId: node.appId
+                                appId: node.appId,
+                                appConn: app.conn
                             });
                         }
                     });
@@ -343,6 +370,7 @@
                         {
                             vm.inputKey = data.text;
                             vm.appId = data.appId;
+                            vm.appConn = data.appConn;
                             vm.search();
                         }
                     }

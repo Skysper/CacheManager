@@ -129,7 +129,7 @@ namespace CacheManager.Web.Controllers
             }
 
             ICacheService service = new CacheService();
-            PagedDataJsonMsg result =  service.Search(app, key, pageIndex.Value, pageSize.Value, !ignoreType.Value);
+            PagedDataJsonMsg result =  service.Search(app, key, pageIndex.Value, pageSize.Value, ignoreType.Value);
             return Json(result);
         }
 
