@@ -22,7 +22,7 @@
                 <div class="col-sm-9">
                     <div class="input-group">
                         <input type="text" ref="key" placeholder="键值..." v-model="inputKey" class="form-control input-search-key" />
-                        <a class="glyphicon glyphicon-remove btn form-control-feedback" 
+                        <a class="glyphicon glyphicon-remove btn form-control-feedback"
                            style="pointer-events:auto;color:#cacaca;position:absolute;right:54px;" v-on:click="clearKey"></a>
                         <span class="input-group-btn">
                             <button class="btn btn-default" v-on:click="research" type="button">查找</button>
@@ -116,7 +116,7 @@
                                     <option value="5">Hash</option>
                                 </select>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-4">
                                 <div class="input-group">
                                     <span class="input-group-addon">
                                         <input type="checkbox" v-model="resetTTL" />
@@ -268,6 +268,9 @@
                 },viewCache: function (item) {
 
                 }, clearCache: function (item) {
+                    if (!window.confirm("确认要清楚缓存吗?\n清除前，请自行备份内容")) { 
+                        return;
+                    }
                     $.post("@Url.Action("ClearCache")", { appId: vm.appId, key: item.key }, function (result) {
                         if (!result.ok) {
                             alert(result.msg);
@@ -286,7 +289,7 @@
                         if (result.ok) {
                             var data = result.data;
                             vm.viewKey = data.key;
-                            vm.initTTL = data.timeToLive;
+                            vm.initTTL = data.expire;
                             vm.initValue = data.value;
                             vm.resetTTL = false;
                             vm.initType = data.type;
@@ -302,8 +305,15 @@
                     }
                     var vm = this;
                     $.post("@Url.Action("Save")", model, function (result) {
-                        console.log(result);
-                        vm.search();
+                        console.log("save result:",result);
+                        if (result.ok == 1) {
+                            vm.changeLayerStatus();
+                            vm.search();
+                        } else if (result.msg != "") {
+                            alert(result.msg);
+                        } else {
+                            alert("保存失败");
+                        }
                     });
 
                 }
