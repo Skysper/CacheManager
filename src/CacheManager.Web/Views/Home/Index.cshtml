@@ -21,12 +21,14 @@
             <div class="row">
                 <div class="col-sm-9">
                     <div class="input-group">
-                        <input type="text" placeholder="键值..." v-model="inputKey" class="form-control input-search-key" />
+                        <input type="text" ref="key" placeholder="键值..." v-model="inputKey" class="form-control input-search-key" />
+                        <a class="glyphicon glyphicon-remove btn form-control-feedback" 
+                           style="pointer-events:auto;color:#cacaca;position:absolute;right:54px;" v-on:click="clearKey"></a>
                         <span class="input-group-btn">
                             <button class="btn btn-default" v-on:click="research" type="button">查找</button>
                         </span>
                     </div>
-                </div>                
+                </div>
                 <div class="col-sm-3">
                     <span class="checkbox">
                         <label>
@@ -79,7 +81,7 @@
         </div>
     </div>
 
-    <div class="modal" tabindex="-1"  v-bind:style="{display:layerShowStatus?'block':''}">
+    <div class="modal" tabindex="-1" v-bind:style="{display:layerShowStatus?'block':''}">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -169,6 +171,10 @@
                 }
             },
             methods: {
+                clearKey: function () {
+                    this.inputKey = "";
+                    this.$refs.key.focus();
+                },
                 research: function () {
                     this.pageIndex = 1;
                     this.search();
@@ -329,7 +335,7 @@
             {
                 $.each(apps, function (index, app) {
                     $.each(nodes, function (index, node) {
-              
+
                         if (node.appId == app.id)
                         {
                             console.log("node", node);
