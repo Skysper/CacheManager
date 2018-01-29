@@ -21,6 +21,7 @@ namespace CacheManager.Caching.Redis
         {
             try
             {
+                if (!_client.IsConnected) return false;
                 return _client.GetDatabase().KeyDelete(key);
             }
             catch (Exception ex)
@@ -33,6 +34,7 @@ namespace CacheManager.Caching.Redis
         {
             try
             {
+                if (!_client.IsConnected) return "";
                 return _client.GetDatabase().StringGet(key);
             }
             catch (Exception ex)
@@ -51,6 +53,7 @@ namespace CacheManager.Caching.Redis
         /// <returns></returns>
         public string QueryWithType(string key, CacheKeyType type)
         {
+            if (!_client.IsConnected) return string.Empty;
             try
             {
                 IDatabase database = _client.GetDatabase();
@@ -85,6 +88,7 @@ namespace CacheManager.Caching.Redis
 
         public bool Set(string key, CacheKeyType type, string value, int timeToLive)
         {
+            if (!_client.IsConnected) return false;
             IDatabase database = _client.GetDatabase();
             IOperator op = null;
             switch (type)
@@ -115,11 +119,15 @@ namespace CacheManager.Caching.Redis
 
         public IEnumerable<string> Query(string[] keys)
         {
-            var count = keys.Length;
-            var redisKeys = keys.Select(key => (RedisKey)key).ToArray();
+            if (!_client.IsConnected)
+            {
+                return null;
+            }
 
             try
             {
+                var count = keys.Length;
+                var redisKeys = keys.Select(key => (RedisKey)key).ToArray();
                 if (_isCluster)
                 {
                     List<string> list = new List<string>();
@@ -154,6 +162,10 @@ namespace CacheManager.Caching.Redis
         {
             try
             {
+                if (!_client.IsConnected)
+                {
+                    return CacheKeyType.None;
+                }
                 return (CacheKeyType)((int)_client.GetDatabase().KeyType(key));
             }
             catch (Exception ex)
@@ -164,6 +176,9 @@ namespace CacheManager.Caching.Redis
 
         public List<CacheKeyType> Type(string[] keys)
         {
+            if (!_client.IsConnected) {
+                return null;
+            }
             var db = _client.GetDatabase();
             List<CacheKeyType> list = new List<CacheKeyType>();
             foreach (var key in keys)
@@ -176,6 +191,9 @@ namespace CacheManager.Caching.Redis
 
         public List<TimeSpan?> Expire(string[] keys)
         {
+            if (!_client.IsConnected) {
+                return null;
+            }
             var db = _client.GetDatabase();
             List<TimeSpan?> list = new List<TimeSpan?>();
             foreach (var key in keys)
@@ -193,25 +211,35 @@ namespace CacheManager.Caching.Redis
         /// <returns></returns>
         private void InitClient(string conn)
         {
-            _conn = conn;
-            string[] array = _conn.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
-            if (array.Length > 1)
+            try
             {
-                _isCluster = true;
-                string[] ipAndPortArray = new string[array.Length * 2];
+                _conn = conn;
+                string[] array = _conn.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
                 ConfigurationOptions options = new ConfigurationOptions();
-                List<EndPoint> endPoints = new List<EndPoint>();
-                for (int i = 0; i < array.Length; i++)
+                options.AbortOnConnectFail = false;
+                if (array.Length > 1)
                 {
-                    options.EndPoints.Add(array[i]);
+                    _isCluster = true;
+
+                    string[] ipAndPortArray = new string[array.Length * 2];
+                    List<EndPoint> endPoints = new List<EndPoint>();
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        options.EndPoints.Add(array[i]);
+                    }
+                    options.AllowAdmin = true;
+                    _client = ConnectionMultiplexer.Connect(options);
                 }
-                options.AllowAdmin = true;
-                _client = ConnectionMultiplexer.Connect(options);
+                else
+                {
+                    _isCluster = false;
+                    
+                    options.EndPoints.Add(_conn);
+                    _client = ConnectionMultiplexer.Connect(options);
+                }
             }
-            else
-            {
-                _isCluster = false;
-                _client = ConnectionMultiplexer.Connect(_conn);
+            catch (Exception ex) {
+                _client = null;
             }
         }
 
@@ -226,6 +254,7 @@ namespace CacheManager.Caching.Redis
 
         public TimeSpan? Expire(string key)
         {
+            if (_client == null) return null;
             var db = _client.GetDatabase();
             return db.KeyTimeToLive(key, CommandFlags.PreferSlave);
         }

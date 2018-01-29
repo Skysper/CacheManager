@@ -60,21 +60,25 @@ namespace CacheManager.Service
             var typeResult = cache.Type(keys.ToArray());
 
             List<string> keyResult = null;
-            if (ignoreType)
+            if(typeResult != null)
             {
-                var keyArray = keys.ToArray();
-                keyResult = cache.Query(keys.ToArray()).ToList();
-            }
-            else {
-                keyResult = new List<string>();
-                for (int i = 0; i < keys.Count; i++)
+                if (ignoreType)
                 {
-                    keyResult.Add(cache.QueryWithType(keys[i], typeResult[i]));
+                    var keyArray = keys.ToArray();
+                    keyResult = cache.Query(keys.ToArray()).ToList();
+                }
+                else
+                {
+                    keyResult = new List<string>();
+                    for (int i = 0; i < keys.Count; i++)
+                    {
+                        keyResult.Add(cache.QueryWithType(keys[i], typeResult[i]));
+                    }
                 }
             }
             
+            
             var expireResult = cache.Expire(keys.ToArray());
-          
 
             cache.Close();
 
