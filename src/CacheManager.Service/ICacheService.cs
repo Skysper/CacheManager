@@ -10,6 +10,6 @@ namespace CacheManager.Service
     {
         CacheResult Query(App app, string key);
 
-        PagedDataJsonMsg Search(App app, string key, int pageIndex, int pageSize, bool ignoreType = true);
+        PagedDataJsonMsg Search(App app, string key, int pageIndex, int pageSize, bool ignoreType = false, bool ignoreNull = false);
     }
 }

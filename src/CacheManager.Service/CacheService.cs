@@ -37,7 +37,7 @@ namespace CacheManager.Service
         /// false will search key result one by one with key type result
         /// (warning:it may cost more time to finish the query)</param>
         /// <returns></returns>
-        public PagedDataJsonMsg Search(App app, string keyFormat, int pageIndex, int pageSize, bool ignoreType = true)
+        public PagedDataJsonMsg Search(App app, string keyFormat, int pageIndex, int pageSize, bool ignoreType = false, bool ignoreNull = false)
         {
             var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
 
@@ -57,17 +57,19 @@ namespace CacheManager.Service
                 keyCount = 1;
             }
 
-            var typeResult = cache.Type(keys.ToArray());
+
 
             List<string> keyResult = null;
-            if(typeResult != null)
+            List<CacheKeyType> typeResult = null;
+            if (ignoreType)
             {
-                if (ignoreType)
-                {
-                    var keyArray = keys.ToArray();
-                    keyResult = cache.Query(keys.ToArray()).ToList();
-                }
-                else
+                var keyArray = keys.ToArray();
+                keyResult = cache.Query(keys.ToArray()).ToList();
+            }
+            else
+            {
+                typeResult = cache.Type(keys.ToArray());
+                if (typeResult != null)
                 {
                     keyResult = new List<string>();
                     for (int i = 0; i < keys.Count; i++)
@@ -76,15 +78,16 @@ namespace CacheManager.Service
                     }
                 }
             }
-            
-            
+
+
             var expireResult = cache.Expire(keys.ToArray());
 
             cache.Close();
 
-            List<CacheResult> list = new List<CacheResult>();
+            List<CacheResult> list = null;
             if (keyResult != null)
             {
+                list = new List<CacheResult>();
                 var resultList = keyResult.ToList();
                 for (int i = 0; i < resultList.Count; i++)
                 {
@@ -92,15 +95,25 @@ namespace CacheManager.Service
                     cr.Index = i + 1;
                     cr.Key = keys[i];
                     cr.Expire = expireResult[i].HasValue ? (expireResult[i].Value.TotalSeconds + "s") : "";
-                    cr.Type = typeResult[i].ToString();
+                    cr.Type = ignoreType ? "" : typeResult[i].ToString();
                     cr.Value = resultList[i];
+                    if (ignoreNull) {
+                        if (ignoreType && string.IsNullOrEmpty(cr.Value.Trim()))
+                        {
+                            continue;
+                        }
+                        else if (cr.Type == CacheKeyType.None.ToString())
+                        {
+                            continue;
+                        }
+                    } 
                     list.Add(cr);
                 }
             }
             //if the cache connection string is error
             //the cache result list will return null
             //then reset the key count to 0
-            if (list == null || list.Count == 0)
+            if (list == null)
             {
                 keyCount = 0;
             }

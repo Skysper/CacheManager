@@ -19,7 +19,7 @@
         </div>
         <div class="search col-sm-8">
             <div class="row">
-                <div class="col-sm-9">
+                <div class="col-sm-8">
                     <div class="input-group">
                         <input type="text" ref="key" placeholder="键值..." v-model="inputKey" class="form-control input-search-key" />
                         <a class="glyphicon glyphicon-remove btn form-control-feedback"
@@ -29,10 +29,17 @@
                         </span>
                     </div>
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-2">
                     <span class="checkbox">
                         <label>
                             <input v-model="ignoreType" type="checkbox"> 忽略类型
+                        </label>
+                    </span>
+                </div>
+                <div class="col-sm-2">
+                    <span class="checkbox">
+                        <label>
+                            <input v-model="ignoreNull" type="checkbox"> 忽略空值
                         </label>
                     </span>
                 </div>
@@ -42,6 +49,21 @@
             </div>
 
             <div style="margin-top:15px;">
+                <div class="row" style="margin-bottom:15px;">
+                    <div class="col-sm-3">
+                        <select class="form-control" v-model="pageSize">
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                            <option value="2000">2000</option>
+                            <option value="5000">5000</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div v-if="noData" class="text-center">未能获取到任何结果</div>
                 <table v-if="!noData" class="table table-striped table-bordered table-hover">
                     <thead>
@@ -62,8 +84,8 @@
                             <td>{{item.value}}</td>
                             <td>{{item.expire}}</td>
                             <td>
-                                <a href="javascript:;" class="btn btn-primary" v-on:click="viewMore(item)">详细</a>
-                                <a href="javascript:;" class="btn btn-primary" v-on:click="clearCache(item)">清除缓存</a>
+                                <a href="javascript:;" class="btn btn-primary" v-on:click="viewMore(item)">Details</a>
+                                <a href="javascript:;" class="btn btn-primary" v-on:click="clearCache(item)">Remove</a>
                             </td>
                         </tr>
                     </tbody>
@@ -150,7 +172,7 @@
                 appId: 0,
                 appConn:"",
                 items: [],
-                pageSize: 50,
+                pageSize: 200,
                 pageIndex: 1,
                 maxPage:0,
                 showPageNumber:9,
@@ -158,6 +180,7 @@
                 noData: true,
                 layerShowStatus: false,
                 ignoreType: false,
+                ignoreNull: true,
                 //properties for edit
                 viewKey: "",
                 initValue: "",
@@ -167,6 +190,13 @@
             },
             watch: {
                 ignoreType(oldValue, newValue) {
+                    this.search();
+                },
+                ignoreNull(oldValue, newValue) {
+                    this.search();
+                },
+                pageSize(oldValue, newValue) {
+                    this.pageIndex = 1;
                     this.search();
                 }
             },
@@ -187,7 +217,8 @@
                         "appId": self.appId,
                         "pageSize": self.pageSize,
                         "pageIndex": self.pageIndex,
-                        "ignoreType": self.ignoreType
+                        "ignoreType": self.ignoreType,
+                        "ignoreNull": self.ignoreNull
                     }, function (result) {
                         console.log("search querey succeed!");
                         if (result.count > 0) {
@@ -265,8 +296,6 @@
                         array.push(i);
                     }
                     this.pages = array;
-                },viewCache: function (item) {
-
                 }, clearCache: function (item) {
                     if (!window.confirm("确认要清楚缓存吗?\n清除前，请自行备份内容")) { 
                         return;
