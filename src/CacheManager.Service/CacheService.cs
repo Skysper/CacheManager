@@ -97,7 +97,11 @@ namespace CacheManager.Service
                 }
             }
 
-            var expireResult = cache.Expire(keys.ToArray());
+            List<TimeSpan?> expireResult = null;
+            if(!ignoreTTL)
+            {
+                expireResult = cache.Expire(keys.ToArray());
+            }
 
             cache.Close();
 
