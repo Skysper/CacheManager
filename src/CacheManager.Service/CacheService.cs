@@ -37,7 +37,7 @@ namespace CacheManager.Service
         /// false will search key result one by one with key type result
         /// (warning:it may cost more time to finish the query)</param>
         /// <returns></returns>
-        public PagedDataJsonMsg Search(App app, string keyFormat, int pageIndex, int pageSize, bool ignoreType = false, bool ignoreNull = false)
+        public PagedDataJsonMsg Search(App app, string keyFormat, int pageIndex, int pageSize, bool ignoreTTL = false, bool ignoreNull = false)
         {
             var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, app.ConnectionString);
 
@@ -60,25 +60,15 @@ namespace CacheManager.Service
 
 
             List<string> keyResult = null;
-            List<CacheKeyType> typeResult = null;
-            if (ignoreType)
+            List<CacheKeyType> typeResult = cache.Type(keys.ToArray());
+            if (typeResult != null)
             {
-                var keyArray = keys.ToArray();
-                keyResult = cache.Query(keys.ToArray()).ToList();
-            }
-            else
-            {
-                typeResult = cache.Type(keys.ToArray());
-                if (typeResult != null)
+                keyResult = new List<string>();
+                for (int i = 0; i < keys.Count; i++)
                 {
-                    keyResult = new List<string>();
-                    for (int i = 0; i < keys.Count; i++)
-                    {
-                        keyResult.Add(cache.QueryWithType(keys[i], typeResult[i]));
-                    }
+                    keyResult.Add(cache.QueryWithType(keys[i], typeResult[i]));
                 }
             }
-
 
             var expireResult = cache.Expire(keys.ToArray());
 
@@ -94,19 +84,13 @@ namespace CacheManager.Service
                     Caching.CacheResult cr = new Caching.CacheResult();
                     cr.Index = i + 1;
                     cr.Key = keys[i];
-                    cr.Expire = expireResult[i].HasValue ? (expireResult[i].Value.TotalSeconds + "s") : "";
-                    cr.Type = ignoreType ? "" : typeResult[i].ToString();
+                    cr.Expire = !ignoreTTL && expireResult[i].HasValue ? (expireResult[i].Value.TotalSeconds + "s") : "";
+                    cr.Type = typeResult[i].ToString();
                     cr.Value = resultList[i];
-                    if (ignoreNull) {
-                        if (ignoreType && string.IsNullOrEmpty(cr.Value.Trim()))
-                        {
-                            continue;
-                        }
-                        else if (cr.Type == CacheKeyType.None.ToString())
-                        {
-                            continue;
-                        }
-                    } 
+                    if (ignoreNull && cr.Type == CacheKeyType.None.ToString())
+                    {
+                        continue;
+                    }
                     list.Add(cr);
                 }
             }

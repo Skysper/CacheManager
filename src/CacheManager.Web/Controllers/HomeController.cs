@@ -101,7 +101,7 @@ namespace CacheManager.Web.Controllers
         }
 
 
-        public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId, bool? ignoreType,bool? ignoreNull)
+        public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId, bool? ignoreTTL,bool? ignoreNull)
         {
             if (!appId.HasValue)
             {
@@ -116,13 +116,13 @@ namespace CacheManager.Web.Controllers
             {
                 pageSize = 50;
             }
-            if (!ignoreType.HasValue)
+            if (!ignoreTTL.HasValue)
             {
-                ignoreType = false;
+                ignoreTTL = true;
             }
 
             if (!ignoreNull.HasValue) {
-                ignoreNull = false;
+                ignoreNull = true;
             }
 
             Model.App app = _appService.Find(appId.Value);
@@ -132,7 +132,7 @@ namespace CacheManager.Web.Controllers
             }
 
             ICacheService service = new CacheService();
-            PagedDataJsonMsg result = service.Search(app, key, pageIndex.Value, pageSize.Value, ignoreType.Value, ignoreNull.Value);
+            PagedDataJsonMsg result = service.Search(app, key, pageIndex.Value, pageSize.Value, ignoreTTL.Value, ignoreNull.Value);
             return Json(result);
         }
 
