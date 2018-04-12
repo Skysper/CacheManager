@@ -87,7 +87,13 @@ namespace CacheManager.Service
                 keyResult = new List<string>();
                 for (int i = 0; i < keys.Count; i++)
                 {
-                    keyResult.Add(cache.QueryWithType(keys[i], typeResult[i]));
+                    if (typeResult[i] == CacheKeyType.None) {
+                        keyResult.Add("");
+                    }
+                    else
+                    {
+                        keyResult.Add(cache.QueryWithType(keys[i], typeResult[i]));
+                    }
                 }
             }
 
