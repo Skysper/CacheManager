@@ -58,11 +58,25 @@ namespace CacheManager.Web.Controllers
                 return result;
             }
 
-            var cache = Caching.CacheFactory.Create(Caching.CacheType.Rediscache, _app.ConnectionString);
+            ICacheService service = new CacheService();
+           
+            bool isOk = service.Clear(_app, key);
+            return Json(new JsonMsg(isOk ? MsgConst.OK : MsgConst.ERROR));
 
-            bool isOk = cache.Clear(key);
+        }
 
-            cache.Close();
+        public IActionResult ClearAll(string keys, int? appId)
+        {
+            IActionResult result = ValidateKeyAndAppInfo(keys, appId);
+            if (result != null)
+            {
+                return result;
+            }
+            List<string> list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(keys);
+
+            ICacheService service = new CacheService();
+            bool isOk = service.Clear(_app, list);
+
             return Json(new JsonMsg(isOk ? MsgConst.OK : MsgConst.ERROR));
 
         }
@@ -101,7 +115,7 @@ namespace CacheManager.Web.Controllers
         }
 
 
-        public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId, bool? ignoreTTL,bool? ignoreNull)
+        public IActionResult Search(string key, int? pageIndex, int? pageSize, int? appId, bool? ignoreTTL, bool? ignoreNull)
         {
             if (!appId.HasValue)
             {
@@ -121,7 +135,8 @@ namespace CacheManager.Web.Controllers
                 ignoreTTL = true;
             }
 
-            if (!ignoreNull.HasValue) {
+            if (!ignoreNull.HasValue)
+            {
                 ignoreNull = true;
             }
 

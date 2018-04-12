@@ -261,6 +261,7 @@
                          self.initPages(0);
                          console.log("网络或服务器错误");
                          self.query = "Server Error or Network Error";
+                         self.hideMsg();
                     });
                 },
                 goToPage: function (i)
@@ -334,7 +335,7 @@
                             alert(result.msg);
                             return;
                         } else {
-                            item.type = "";
+                            item.type = "None";
                             item.value = "";
                         }
                     });
@@ -343,17 +344,24 @@
                     if (!window.confirm("Are you sure to clear all the cache?")) {
                         return;
                     }
-                    for (var i = 0; i < this.items.length; i++) {
-                        var item = this.items[i];
-                        $.post("@Url.Action("ClearCache")", { appId: vm.appId, key: item.key }, function (result) {
-                            if (!result.ok) {
-                                return;
-                            } else {
-                                item.type = "";
-                                item.value = "";
-                            }
-                        });
+                    this.showMsg("Removing all the keys ...");
+                    var self = this;
+                    var keyArray = [];
+                    for (let i = 0; i < this.items.length; i++) {
+                        keyArray.push(this.items[i].key);
                     }
+                    var keys = JSON.stringify(keyArray);
+   
+                    $.post("@Url.Action("ClearAll")", { appId: vm.appId, "keys": keys }, function (result) {
+                        if (!result.ok) {
+                            self.hideMsg();
+                            return;
+                        } else {
+                            self.search();
+                        }
+                    }).error(function () {
+                        self.hideMsg();
+                    });
                 }, changeLayerStatus: function () {
                     this.layerShowStatus = !this.layerShowStatus;
                 },

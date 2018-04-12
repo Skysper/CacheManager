@@ -9,12 +9,33 @@ namespace CacheManager.Service
 {
     public class CacheService : ICacheService
     {
+        public bool Clear(App app, string key)
+        {
+            var cache = Caching.CacheFactory.Create(app.Type, app.ConnectionString);
+            bool isOk = cache.Clear(key);
+
+            cache.Close();
+            return isOk;
+        }
+
+        public bool Clear(App app, List<string> keys) {
+            var cache = Caching.CacheFactory.Create(app.Type, app.ConnectionString);
+            foreach (var item in keys) {
+                cache.Clear(item);
+            }
+            cache.Close();
+            return true;
+        }
+
+
         public CacheResult Query(App app, string key)
         {
             var cache = Caching.CacheFactory.Create(app.Type, app.ConnectionString);
             CacheKeyType type = cache.Type(key);
             string value = cache.QueryWithType(key, type);
             TimeSpan? expire = cache.Expire(key);
+
+            cache.Close();
 
             CacheResult result = new CacheResult();
             result.Expire = expire.HasValue ? expire.Value.TotalSeconds.ToString() : "";
